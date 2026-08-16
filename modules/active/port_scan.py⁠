@@ -1,0 +1,26 @@
+import nmap
+from utils.logger import get_logger
+
+logger = get_logger()
+
+def run_nmap(target, ports):
+    try:
+        nm = nmap.PortScanner()
+        port_arg = "-F" if ports == "top-100" else f"-p {ports}"
+        
+        # Runs a basic SYN scan with service version detection
+        logger.info(f"Scanning {target} with args: -sS -sV {port_arg}")
+        nm.scan(hosts=target, arguments=f"-sS -sV {port_arg}")
+        
+        scan_data = []
+        for host in nm.all_hosts():
+            for proto in nm[host].all_protocols():
+                ports_list = nm[host][proto].keys()
+                for port in ports_list:
+                    state = nm[host][proto][port]['state']
+                    service = nm[host][proto][port]['name']
+                    scan_data.append({"port": port, "state": state, "service": service})
+        return scan_data
+    except Exception as e:
+        logger.error(f"Nmap scan failed on {target}: {e}")
+        return []
