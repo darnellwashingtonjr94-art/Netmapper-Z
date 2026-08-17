@@ -1,0 +1,17 @@
+import socket
+from utils.logger import get_logger
+
+logger = get_logger()
+
+COMMON_SUBDOMAINS = ["www", "mail", "ftp", "admin", "test", "dev", "api", "portal"]
+
+def resolve_subdomains(base_domain):
+    resolved = {}
+    for sub in COMMON_SUBDOMAINS:
+        hostname = f"{sub}.{base_domain}"
+        try:
+            ip = socket.gethostbyname(hostname)
+            resolved[hostname] = ip
+        except socket.gaierror:
+            continue
+    return resolved
