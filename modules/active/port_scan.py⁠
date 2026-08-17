@@ -8,7 +8,6 @@ def run_nmap(target, ports):
         nm = nmap.PortScanner()
         port_arg = "-F" if ports == "top-100" else f"-p {ports}"
         
-        # Runs a basic SYN scan with service version detection
         logger.info(f"Scanning {target} with args: -sS -sV {port_arg}")
         nm.scan(hosts=target, arguments=f"-sS -sV {port_arg}")
         
