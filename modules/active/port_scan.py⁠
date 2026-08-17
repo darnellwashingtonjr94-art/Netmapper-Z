@@ -24,3 +24,4 @@ def run_nmap(target, ports):
     except Exception as e:
         logger.error(f"Nmap scan failed on {target}: {e}")
         return []
+
