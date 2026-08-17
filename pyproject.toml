@@ -19,7 +19,5 @@ dependencies = [
 [project.scripts]
 nmz = "nmz:main"
 
-[tool.setuptools]
-packages = ["api", "core", "config", "modules", "reports"]
-py-modules = ["nmz"]
-
+[tool.setuptools.packages.find]
+where = ["."]
