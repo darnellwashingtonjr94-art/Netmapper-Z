@@ -1,28 +1,37 @@
-from modules.passive.crt_sh import fetch_subdomains
-from modules.passive.whois_lookup import get_whois
-from modules.active.port_scan import run_nmap
-from reports.json_report import generate_report
+# 1. Ensure the directory structure and init files exist locally
+mkdir -p modules/active
+touch modules/__init__.py modules/active/__init__.py
+
+# 2. Re-create the port_scan.py file to make sure it's physically there
+cat << 'EOF' > modules/active/port_scan.py
+import nmap
 from utils.logger import get_logger
 
 logger = get_logger()
 
-def run_scan(domain, mode, ports, output_file):
-    results = {"target": domain, "whois": {}, "subdomains": [], "live_hosts": {}}
-    
-    # 1. Passive Reconnaissance
-    logger.info("Running WHOIS lookup...")
-    results["whois"] = get_whois(domain)
-    
-    logger.info("Querying Certificate Transparency logs for subdomains...")
-    results["subdomains"] = fetch_subdomains(domain)
-    
-    # 2. Active Reconnaissance (if selected)
-    if mode == "active":
-        logger.info(f"Initiating active Nmap scan on discovered targets...")
-        for sub in results["subdomains"]:
-            # In a real tool, you would resolve the sub to an IP first
-            results["live_hosts"][sub] = run_nmap(sub, ports)
-            
-    # 3. Report Generation
-    generate_report(results, output_file)
-    logger.info(f"Scan complete. Results saved to {output_file}")
+def run_nmap(target, ports):
+    try:
+        nm = nmap.PortScanner()
+        port_arg = "-F" if ports == "top-100" else f"-p {ports}"
+        
+        logger.info(f"Scanning {target} with args: -sS -sV {port_arg}")
+        nm.scan(hosts=target, arguments=f"-sS -sV {port_arg}")
+        
+        scan_data = []
+        for host in nm.all_hosts():
+            for proto in nm[host].all_protocols():
+                ports_list = nm[host][proto].keys()
+                for port in ports_list:
+                    state = nm[host][proto][port]['state']
+                    service = nm[host][proto][port]['name']
+                    scan_data.append({"port": port, "state": state, "service": service})
+        return scan_data
+    except Exception as e:
+        logger.error(f"Nmap scan failed on {target}: {e}")
+        return []
+EOF
+
+# 3. Force git to track and push the files
+git add modules/
+git commit -m "Force track modules and port_scan.py for CI"
+git push origin main
