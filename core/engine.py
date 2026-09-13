@@ -1,19 +1,18 @@
 import sys
 from pathlib import Path
 
-# Add project root directory to sys.path to resolve imports properly
+# Resolve project root
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from modules.passive.crt_sh import fetch_subdomains
 from modules.passive.whois_lookup import get_whois
-from modules.active.port_scan import run_nmap
+from modules.active_port_scan import run_nmap
 from reports.json_report import generate_report
 from utils.logger import get_logger
 
 logger = get_logger()
 
 def run_scan(domain, mode, ports, output_file):
-    # Initialize dictionary keys so appended data doesn't throw a KeyError
     results = {
         "target": domain, 
         "whois": {},
