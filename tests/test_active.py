@@ -1,17 +1,17 @@
 import sys
 from pathlib import Path
 
-# Add project root directory to sys.path so 'modules' imports resolve correctly
+# Resolve project root
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import unittest
 from unittest.mock import patch, Mock
-from modules.active.port_scan import run_nmap
+from modules.active_port_scan import run_nmap
 
 
 class TestActiveModules(unittest.TestCase):
 
-    @patch('modules.active.port_scan.nmap.PortScanner')
+    @patch('modules.active_port_scan.nmap.PortScanner')
     def test_run_nmap_success(self, mock_port_scanner):
         mock_instance = Mock()
         mock_instance.all_hosts.return_value = ['127.0.0.1']
